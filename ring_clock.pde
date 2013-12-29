@@ -117,7 +117,7 @@ void startAlarm() {
     strip.show();
     delay(200);
   } 
-  delay(200);
+  delay(400);
 }
 
 
@@ -146,9 +146,10 @@ void checkForCapacitiveInput() {
         if ((AlarmMinutes <= 0) || (AlarmMinutes > 60)) {
           AlarmOn = false;
           AlarmMinutes = 0;
+          colorStrip(color_off);
           setAlarmPixel();
           strip.show();
-          delay(250);
+          delay(500);
         }
         delay(180);
       } 
