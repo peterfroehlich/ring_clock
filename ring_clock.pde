@@ -167,6 +167,9 @@ void checkForCapacitiveInput() {
 
 void readTime() {
   hour=Clock.getHour(h12, PM);
+  if ( hour >= 12 ) {
+    hour=hour-12;
+  }
   minute=Clock.getMinute();
   second=Clock.getSecond();
 }
