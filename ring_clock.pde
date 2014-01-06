@@ -38,12 +38,12 @@ bool PM;
 
 int setTimeInitialDelay=400;
 
-// Outer ring to increment alarm
-CapSense cs_4_8 = CapSense(4,8);        // 120k resistor between pins 4 & 8, pin 8 is sensor pin, add a wire and or foil
+// Inner ring to increment alarm
+CapSense touch1 = CapSense(4,12);        // 120k resistor between pins 4 & 12, pin 12 is sensor pin, add a wire and or foil
 
-// Inner ring to decrement alarm
-CapSense cs_4_12 = CapSense(4,12);      // 120k resistor between pins 4 & 12, pin 12 is sensor pin, add a wire and or foil
-int capacitiveSensorThreshold = 160;
+// Outer ring to decrement alarm
+CapSense touch2 = CapSense(4,8);      // 120k resistor between pins 4 & 8, pin 8 is sensor pin, add a wire and or foil
+int capacitiveSensorThreshold = 70;
 int AlarmTouchThreshold = 10;
 
 int delayCounterSetAlarm = 0;
@@ -64,9 +64,11 @@ void setup() {
   // Button to set time
   pinMode(buttonPin, INPUT);
   
-  // Stuff for capazitive touch
-  cs_4_8.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate
-  cs_4_12.set_CS_AutocaL_Millis(0xFFFFFFFF);
+  // Stuff for capacitive touch
+  //touch1.set_CS_AutocaL_Millis(0xFFFFFFFF);     // turn off autocalibrate
+  //touch2.set_CS_AutocaL_Millis(0xFFFFFFFF);
+  
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -109,7 +111,7 @@ void manageAlarm() {
 void startAlarm() {
   AlarmOn = false;
   colorStrip(color_off);
-  while ((cs_4_8.capSense(30) < capacitiveSensorThreshold) && (cs_4_12.capSense(30) < capacitiveSensorThreshold)) {
+  while ((touch1.capSense(30) < capacitiveSensorThreshold) && (touch2.capSense(30) < capacitiveSensorThreshold)) {
     colorStrip(color_alarm);
     strip.show();
     delay(200);
@@ -122,17 +124,21 @@ void startAlarm() {
 
 
 void checkForCapacitiveInput() {
-  if ((cs_4_8.capSense(30) > capacitiveSensorThreshold) || (cs_4_12.capSense(30) > capacitiveSensorThreshold)) {
+  Serial.print("Touch1  ");
+  Serial.println(touch1.capSense(30));
+  Serial.print("Touch2  ");
+  Serial.println(touch2.capSense(30));
+  if ((touch1.capSense(30) > capacitiveSensorThreshold) || (touch2.capSense(30) > capacitiveSensorThreshold)) {
 
     if (delayCounterSetAlarm >= AlarmTouchThreshold) {
-      while ((cs_4_8.capSense(30) > capacitiveSensorThreshold) || (cs_4_12.capSense(30) > capacitiveSensorThreshold)) {
+      while ((touch1.capSense(30) > capacitiveSensorThreshold) || (touch2.capSense(30) > capacitiveSensorThreshold)) {
         MinuteNotSubtractedFromAlarmFlag = false;
         AlarmOn = true;
         AlarmSecond = Clock.getSecond();
        
-        if (cs_4_8.capSense(30) > capacitiveSensorThreshold) {
+        if (touch1.capSense(30) > capacitiveSensorThreshold) {
           ++AlarmMinutes; 
-        } else if (cs_4_12.capSense(30) > capacitiveSensorThreshold) {
+        } else if (touch2.capSense(30) > capacitiveSensorThreshold) {
           if (AlarmMinutes <= 0) {
             AlarmMinutes = 60;
           } else {
@@ -151,7 +157,7 @@ void checkForCapacitiveInput() {
           strip.show();
           delay(500);
         }
-        delay(180);
+        delay(130);
       } 
     } else {
       ++delayCounterSetAlarm;
